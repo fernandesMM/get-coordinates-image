@@ -111,13 +111,13 @@
         <button id="zoomIn">+</button>
     </div>
 
+    <div id="coordinates">
+        Coordenadas: Nenhuma (clique na imagem para obter as coordenadas)
+    </div>
+
     <div id="imageContainer">
         <img id="imagePreview" src="" alt="Pré-visualização da imagem">
         <div id="coordinatePoint"></div>
-    </div>
-
-    <div id="coordinates">
-        Coordenadas: Nenhuma
     </div>
 
     <script>
@@ -223,7 +223,7 @@
                 coordinatePoint.style.top = `${event.clientY - rect.top}px`;
                 coordinatePoint.style.display = 'block';
 
-                coordinatesDisplay.textContent = `Coordenadas (Original): (${Math.round(x)}, ${Math.round(y)})`;
+                coordinatesDisplay.textContent = `Coordenadas: (Eixo X: ${Math.round(x)}, Eixo Y: ${Math.round(y)})`;
             }
         });
     </script>
