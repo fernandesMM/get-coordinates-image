@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Visualizador de Coordenadas de Imagem</title>
+    <title>Visualizador de Coordenadas de Imagem com Zoom</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,12 +13,50 @@
             text-align: center;
         }
 
+        #fileDropZone {
+            border: 3px dashed #a0a0a0;
+            border-radius: 20px;
+            width: 100%;
+            padding: 50px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+
+        #fileDropZone:hover {
+            background-color: #f0f0f0;
+            border-color: #4A90E2;
+        }
+
+        #fileDropZone.dragover {
+            background-color: #e0e0e0;
+            border-color: #2980b9;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #fileDropZone p {
+            color: #666;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        #fileDropZone .icon {
+            font-size: 50px;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+
         #imageContainer {
             position: relative;
             cursor: crosshair;
             overflow: auto;
             max-height: 600px;
             border: 2px dashed #ccc;
+            margin-top: 20px;
         }
 
         #imagePreview {
@@ -47,9 +85,14 @@
 </head>
 
 <body>
-    <h1>Visualizador de Coordenadas de Imagem</h1>
+    <h1>Visualizador de Coordenadas de Imagem com Zoom</h1>
 
     <input type="file" id="fileInput" accept="image/*">
+
+    <div id="fileDropZone">
+        <div class="icon">📤</div>
+        <p>Arraste ou escolha um arquivo aqui</p>
+    </div>
 
     <div id="controlPanel">
         <button id="zoomOut">-</button>
@@ -67,6 +110,7 @@
 
     <script>
         const fileInput = document.getElementById('fileInput');
+        const fileDropZone = document.getElementById('fileDropZone');
         const imagePreview = document.getElementById('imagePreview');
         const coordinatesDisplay = document.getElementById('coordinates');
         const imageContainer = document.getElementById('imageContainer');
@@ -78,9 +122,8 @@
         let originalWidth = 0;
         let originalHeight = 0;
 
-        fileInput.addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (file) {
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     imagePreview.src = e.target.result;
@@ -99,6 +142,35 @@
                 }
                 reader.readAsDataURL(file);
             }
+        }
+
+        // Click to select file
+        fileDropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            handleFile(file);
+        });
+
+        // Drag and Drop functionality
+        fileDropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            fileDropZone.classList.add('dragover');
+        });
+
+        fileDropZone.addEventListener('dragleave', () => {
+            fileDropZone.classList.remove('dragover');
+        });
+
+        fileDropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            fileDropZone.classList.remove('dragover');
+
+            const file = event.dataTransfer.files[0];
+            handleFile(file);
         });
 
         function updateZoom() {
@@ -109,14 +181,14 @@
         }
 
         zoomInBtn.addEventListener('click', function () {
-            if (currentZoom < 200) {
+            if (currentZoom < 300) {
                 currentZoom += 25;
                 updateZoom();
             }
         });
 
         zoomOutBtn.addEventListener('click', function () {
-            if (currentZoom > 0) {
+            if (currentZoom > 50) {
                 currentZoom -= 25;
                 updateZoom();
             }
@@ -127,6 +199,7 @@
                 const rect = imagePreview.getBoundingClientRect();
                 const zoomFactor = currentZoom / 100;
 
+                // Calculate coordinates relative to original image size
                 const x = (event.clientX - rect.left) / zoomFactor;
                 const y = (event.clientY - rect.top) / zoomFactor;
 
