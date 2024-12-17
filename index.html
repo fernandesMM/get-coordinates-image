@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizador de Coordenadas de Imagem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #imageContainer {
+            position: relative;
+            cursor: crosshair;
+            overflow: auto;
+            max-height: 600px;
+            border: 2px dashed #ccc;
+        }
+
+        #imagePreview {
+            display: none;
+            transition: transform 0.2s;
+        }
+
+        #coordinates {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        #controlPanel {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #zoomLevel {
+            width: 100px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visualizador de Coordenadas de Imagem</h1>
+
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div id="controlPanel">
+        <button id="zoomOut">-</button>
+        <span id="zoomLevel">100%</span>
+        <button id="zoomIn">+</button>
+    </div>
+
+    <div id="imageContainer">
+        <img id="imagePreview" src="" alt="Pré-visualização da imagem">
+    </div>
+
+    <div id="coordinates">
+        Coordenadas: Nenhuma
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const coordinatesDisplay = document.getElementById('coordinates');
+        const imageContainer = document.getElementById('imageContainer');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomLevelDisplay = document.getElementById('zoomLevel');
+
+        let currentZoom = 100;
+        let originalWidth = 0;
+        let originalHeight = 0;
+
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+
+                    imagePreview.onload = function () {
+                        // Store original dimensions
+                        originalWidth = imagePreview.naturalWidth;
+                        originalHeight = imagePreview.naturalHeight;
+
+                        // Reset zoom
+                        currentZoom = 100;
+                        updateZoom();
+
+                        imagePreview.style.display = 'block';
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateZoom() {
+            const zoomFactor = currentZoom / 100;
+            imagePreview.style.width = `${originalWidth * zoomFactor}px`;
+            imagePreview.style.height = `${originalHeight * zoomFactor}px`;
+            zoomLevelDisplay.textContent = `${currentZoom}%`;
+        }
+
+        zoomInBtn.addEventListener('click', function () {
+            if (currentZoom < 200) {
+                currentZoom += 25;
+                updateZoom();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', function () {
+            if (currentZoom > 0) {
+                currentZoom -= 25;
+                updateZoom();
+            }
+        });
+
+        imageContainer.addEventListener('click', function (event) {
+            if (imagePreview.src) {
+                const rect = imagePreview.getBoundingClientRect();
+                const zoomFactor = currentZoom / 100;
+
+                const x = (event.clientX - rect.left) / zoomFactor;
+                const y = (event.clientY - rect.top) / zoomFactor;
+
+                coordinatesDisplay.textContent = `Coordenadas (Original): (${Math.round(x)}, ${Math.round(y)})`;
+            }
+        });
+    </script>
+</body>
+
+</html>
