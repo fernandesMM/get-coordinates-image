@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             text-align: center;
@@ -64,6 +64,17 @@
             transition: transform 0.2s;
         }
 
+        #coordinatePoint {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            display: none;
+        }
+
         #coordinates {
             margin-top: 20px;
             font-size: 16px;
@@ -102,6 +113,7 @@
 
     <div id="imageContainer">
         <img id="imagePreview" src="" alt="Pré-visualização da imagem">
+        <div id="coordinatePoint"></div>
     </div>
 
     <div id="coordinates">
@@ -117,8 +129,9 @@
         const zoomOutBtn = document.getElementById('zoomOut');
         const zoomInBtn = document.getElementById('zoomIn');
         const zoomLevelDisplay = document.getElementById('zoomLevel');
+        const coordinatePoint = document.getElementById('coordinatePoint');
 
-        let currentZoom = 100;
+        let currentZoom = 25;
         let originalWidth = 0;
         let originalHeight = 0;
 
@@ -134,10 +147,12 @@
                         originalHeight = imagePreview.naturalHeight;
 
                         // Reset zoom
-                        currentZoom = 100;
+                        currentZoom = 25;
                         updateZoom();
 
                         imagePreview.style.display = 'block';
+                        coordinatePoint.style.display = 'none';
+                        coordinatesDisplay.textContent = 'Coordenadas: Nenhuma';
                     }
                 }
                 reader.readAsDataURL(file);
@@ -181,7 +196,7 @@
         }
 
         zoomInBtn.addEventListener('click', function () {
-            if (currentZoom < 300) {
+            if (currentZoom < 200) {
                 currentZoom += 25;
                 updateZoom();
             }
@@ -202,6 +217,11 @@
                 // Calculate coordinates relative to original image size
                 const x = (event.clientX - rect.left) / zoomFactor;
                 const y = (event.clientY - rect.top) / zoomFactor;
+
+                // Position the point marker
+                coordinatePoint.style.left = `${event.clientX - rect.left}px`;
+                coordinatePoint.style.top = `${event.clientY - rect.top}px`;
+                coordinatePoint.style.display = 'block';
 
                 coordinatesDisplay.textContent = `Coordenadas (Original): (${Math.round(x)}, ${Math.round(y)})`;
             }
